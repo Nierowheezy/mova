@@ -1,0 +1,99 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Render Blueprint for the Mova backend (the fintech-banking-app API).
+#
+# Applies the full backend independently:
+#   backend-node Docker web service  +  Managed Postgres  +  persistent disk
+#
+# The frontend is a Vite SPA deployed to Vercel (see frontend/vercel.json).
+# Apply this Blueprint from the Render Dashboard:
+#   https://dashboard.render.com/blueprint/new  ->  pick the GitHub repo
+#
+# Required dashboard-only secrets (sync: false) are listed under the web
+# service. See DEPLOY.md for the fill-in checklist.
+#
+# Note on plans:
+#   - The web service uses `starter` because persistent disks require a paid
+#     plan (free web services cannot mount the /app/uploads disk).
+#   - Postgres uses `free` (256 MB). Upgrade to standard for production HA.
+# ─────────────────────────────────────────────────────────────────────────────
+
+databases:
+  - name: mova-db
+    plan: free
+    region: oregon
+    postgresMajorVersion: 16
+
+services:
+  - type: web
+    name: mova-api
+    runtime: docker
+    rootDir: backend-node
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /healthz
+    maxShutdownDelaySeconds: 120
+
+    # Persistent disk for private KYC document uploads.
+    # Mounted at /app/uploads and wired via UPLOAD_DIR below.
+    disk:
+      name: mova-uploads
+      mountPath: /app/uploads
+      sizeGB: 1
+
+    envVars:
+      # ── Runtime ────────────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8000"
+      - key: METRICS_ENABLED
+        value: "false"
+      - key: MAX_FILE_SIZE
+        value: "5242880"
+
+      # ── Database (wired to the Managed Postgres above) ─────────────────
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mova-db
+          property: connectionString
+
+      # ── File uploads (persistent disk) ─────────────────────────────────
+      - key: UPLOAD_DIR
+        value: /app/uploads
+
+      # ── Secrets: fill these in the Render Dashboard at apply time ───────
+      - key: JWT_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: STRIPE_PUBLIC_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_CONNECT_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_CONNECT_CLIENT_ID
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+
+      # ── Compliance screening ────────────────────────────────────────────
+      # sandbox FAILS CLOSED in production: KYC approvals stay blocked until
+      # a real provider + datasets are configured (opensanctions). This is a
+      # deliberate safety gate, not a bug.
+      - key: SANCTIONS_PROVIDER
+        value: sandbox

@@ -1,0 +1,37 @@
+# ─── macOS ────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ─── Node / dependencies ─────────────────────────────────────────────────
+node_modules/
+dist/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# ─── Environment & secrets ────────────────────────────────────────────────
+# Frontend .env carries VITE_API_URL (localhost by default) and the Stripe
+# publishable key. It must NEVER be committed: it would override the
+# production VITE_API_URL on Vercel and leak build config.
+.env
+.env.*
+!.env.example
+
+# ─── Backend runtime data ─────────────────────────────────────────────────
+# KYC uploads must never hit git; locally mounted via docker volume.
+backend-node/uploads/
+backend-node/data/sanctions/*.csv
+!backend-node/data/sanctions/README.md
+
+# ─── Prisma local artifacts ──────────────────────────────────────────────
+prisma/*.db
+prisma/*.db-journal
+
+# ─── BuildFlow local state (generated, never committed) ──────────────────
+frontend/buildflow/.state/
+
+# ─── Editor / tooling (personal preferences) ─────────────────────────────
+.vscode/
+.idea/
+.playwright-mcp/
+coverage/
+playwright-report/

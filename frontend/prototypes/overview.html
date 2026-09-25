@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mova · Overview</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="shell">
+
+  <!-- ================= SIDEBAR (shared chrome) ================= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a class="brand" href="overview.html">
+        <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="22" height="22" rx="6" fill="var(--text)"/>
+          <path d="M5 16V8l7 6 7-6v8" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="name">Mova</span>
+      </a>
+      <button class="tside-toggle" aria-label="Collapse sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-search">
+      <input class="input" placeholder="Search" type="text" aria-label="Search">
+    </div>
+
+    <nav aria-label="Main">
+      <span class="nav-group-label">Menu</span>
+      <a class="nav-link active" href="overview.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="nav-label">Overview</span>
+      </a>
+      <a class="nav-link" href="transactions-list.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="4" x2="8" y2="9"/></svg>
+        <span class="nav-label">Transactions</span>
+      </a>
+      <a class="nav-link" href="transfers-list.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><polyline points="7 7 17 7 17 17"/></svg>
+        <span class="nav-label">Transfers</span>
+      </a>
+      <a class="nav-link" href="savings-list.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.5" fill="currentColor"/></svg>
+        <span class="nav-label">Savings</span>
+      </a>
+
+      <span class="nav-group-label">Manage</span>
+      <a class="nav-link" href="beneficiaries.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-label">Beneficiaries</span>
+      </a>
+      <a class="nav-link" href="notifications.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="nav-label">Notifications</span>
+      </a>
+      <a class="nav-link" href="kyc.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/><path d="M9 6h6"/></svg>
+        <span class="nav-label">KYC</span>
+      </a>
+      <a class="nav-link nav-muted" href="#" aria-disabled="true">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        <span class="nav-label">Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="side-card">
+        <div class="sc-title">New features available!</div>
+        <div class="sc-text">Check out the new dashboard view. Pages now load faster.</div>
+        <div class="sc-img" aria-hidden="true"></div>
+        <div class="sc-actions">
+          <a class="sc-dismiss" href="#">Dismiss</a>
+          <a class="sc-link" href="#">What's new?</a>
+        </div>
+      </div>
+      <a class="user-chip" href="#">
+        <div class="avatar" aria-hidden="true">AO</div>
+        <div>
+          <div class="uc-name">Ada Obi</div>
+          <div class="uc-email">ada@movaa.app</div>
+        </div>
+        <svg class="uc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title">Overview</div>
+        <div class="page-sub">Wednesday, 23 September 2026</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="ts-wrap">
+  <button class="ts-btn" aria-label="Theme" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+  <div class="ts-popover" role="menu">
+    <div class="ts-label">Appearance</div>
+    <button class="ts-option active" data-theme-choice="light" role="menuitem" aria-selected="true">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Light
+    </button>
+    <button class="ts-option" data-theme-choice="dark" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Dark
+    </button>
+    <div class="ts-divider"></div>
+    <button class="ts-option" data-theme-choice="system" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      System
+    </button>
+  </div>
+</div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1>Good afternoon, Ada</h1>
+          <div class="page-desc">Here's how your money moved this week.</div>
+        </div>
+      </div>
+
+      <!-- Balance hero -->
+      <section class="card card-pad" style="margin-bottom: var(--sp-8)">
+        <div style="display:flex; flex-wrap:wrap; gap:var(--sp-8); align-items:flex-end; justify-content:space-between">
+          <div>
+            <div class="eyebrow">
+              <span class="dot" style="background:var(--success)"></span>&nbsp;Total balance
+            </div>
+            <div class="money display" style="font-size:clamp(2rem,4vw,2.75rem); margin-top: var(--sp-2)">$82,450.13</div>
+            <div class="small" style="margin-top: var(--sp-2)">
+              <span style="color:var(--success); font-weight:500">+3.1%</span>
+              <span class="faint">&nbsp;·&nbsp; this month</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap">
+            <a class="btn btn-primary" href="fund-wallet.html">Fund Wallet</a>
+            <a class="btn btn-secondary" href="withdraw-wallet.html">Withdraw</a>
+            <a class="btn btn-secondary" href="transfer-new.html">Transfer</a>
+          </div>
+        </div>
+        <hr class="hairline" style="margin: var(--sp-6) 0 var(--sp-4)">
+        <div style="display:flex; gap:var(--sp-10); flex-wrap:wrap" class="small subdued">
+          <span><span class="faint">Available:</span> <span class="money tabular" style="color:var(--text)">$81,920.50</span></span>
+          <span><span class="faint">Locked in savings:</span> <span class="money tabular" style="color:var(--text)">$25,400.00</span></span>
+          <span><span class="faint">Spent this month:</span> <span class="money tabular" style="color:var(--text)">$3,872.18</span></span>
+        </div>
+      </section>
+
+      <!-- ===== METRICS CHARTS ===== -->
+      <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:var(--sp-6); margin-bottom:var(--sp-6)">
+
+        <!-- Spending trend (area chart) -->
+        <section class="chart-card">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-3)">
+            <h3>Spending</h3>
+            <span class="chart-sub">this week</span>
+          </div>
+          <svg viewBox="0 0 280 120" style="width:100%; height:auto; display:block" aria-label="Weekly spending trend">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--text)" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="var(--text)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- grid lines -->
+            <line x1="0" y1="24" x2="280" y2="24" stroke="var(--border)" stroke-width="0.5"/>
+            <line x1="0" y1="48" x2="280" y2="48" stroke="var(--border)" stroke-width="0.5"/>
+            <line x1="0" y1="72" x2="280" y2="72" stroke="var(--border)" stroke-width="0.5"/>
+            <line x1="0" y1="96" x2="280" y2="96" stroke="var(--border)" stroke-width="0.5"/>
+            <!-- area fill -->
+            <path d="M0,66 L41,79 L85,25 L129,93 L173,44 L217,74 L260,78 L260,120 L0,120Z" fill="url(#areaGrad)"/>
+            <!-- line -->
+            <polyline points="0,66 41,79 85,25 129,93 173,44 217,74 260,78" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- dots -->
+            <circle cx="0" cy="66" r="3" fill="var(--text)"/>
+            <circle cx="41" cy="79" r="3" fill="var(--text)"/>
+            <circle cx="85" cy="25" r="3" fill="var(--text)"/>
+            <circle cx="129" cy="93" r="3" fill="var(--text)"/>
+            <circle cx="173" cy="44" r="3" fill="var(--text)"/>
+            <circle cx="217" cy="74" r="3" fill="var(--text)"/>
+            <circle cx="260" cy="78" r="3" fill="var(--text)"/>
+            <!-- x labels -->
+            <text x="0" y="112" font-family="var(--font-mono)" font-size="7" fill="var(--text-3)" text-anchor="middle">Mon</text>
+            <text x="41" y="112" font-family="var(--font-mono)" font-size="7" fill="var(--text-3)" text-anchor="middle">Tue</text>
+            <text x="85" y="112" font-family="var(--font-mono)" font-size="7" fill="var(--text-3)" text-anchor="middle">Wed</text>
+            <text x="129" y="112" font-family="var(--font-mono)" font-size="7" fill="var(--text-3)" text-anchor="middle">Thu</text>
+            <text x="173" y="112" font-family="var(--font-mono)" font-size="7" fill="var(--text-3)" text-anchor="middle">Fri</text>
+            <text x="217" y="112" font-family="var(--font-mono)" font-size="7" fill="var(--text-3)" text-anchor="middle">Sat</text>
+            <text x="260" y="112" font-family="var(--font-mono)" font-size="7" fill="var(--text-3)" text-anchor="middle">Sun</text>
+          </svg>
+        </section>
+
+        <!-- Category donut -->
+        <section class="chart-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center">
+          <h3 style="margin-bottom:var(--sp-2)">Categories</h3>
+          <div class="donut-wrap" style="background:conic-gradient(from -90deg, var(--text) 0%, var(--text) 35%, var(--text-2) 35%, var(--text-2) 55%, var(--success-text) 55%, var(--success-text) 80%, var(--warning-text) 80%, var(--warning-text) 95%, var(--text-3) 95%, var(--text-3) 100%)">
+            <div class="donut-center">
+              <span class="money" style="font-size:var(--text-lg)">$780</span>
+              <span class="chart-sub">this week</span>
+            </div>
+          </div>
+          <div class="legend-row">
+            <span class="legend-item"><span class="legend-dot" style="background:var(--text)"></span>Food 35%</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--text-2)"></span>Transit 20%</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--success-text)"></span>Shop 25%</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--warning-text)"></span>Bills 15%</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--text-3)"></span>Other 5%</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Income vs Expenses (bar chart) -->
+      <section class="chart-card" style="margin-bottom:var(--sp-6)">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-4)">
+          <h3>Income vs Expenses</h3>
+          <span class="chart-sub">monthly</span>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-group">
+            <span class="bar-label">Wk 1</span>
+            <div class="bar bar-income" style="height:77%"></div>
+            <div class="bar bar-expense" style="height:59%"></div>
+          </div>
+          <div class="bar-group">
+            <span class="bar-label">Wk 2</span>
+            <div class="bar bar-income" style="height:58%"></div>
+            <div class="bar bar-expense" style="height:68%"></div>
+          </div>
+          <div class="bar-group">
+            <span class="bar-label">Wk 3</span>
+            <div class="bar bar-income" style="height:100%"></div>
+            <div class="bar bar-expense" style="height:47%"></div>
+          </div>
+          <div class="bar-group">
+            <span class="bar-label">Wk 4</span>
+            <div class="bar bar-income" style="height:71%"></div>
+            <div class="bar bar-expense" style="height:64%"></div>
+          </div>
+        </div>
+        <div style="display:flex; gap:var(--sp-6); justify-content:center; margin-top:var(--sp-3)">
+          <span class="legend-item"><span class="legend-dot" style="background:var(--success-text)"></span>Income</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--danger-text)"></span>Expense</span>
+        </div>
+      </section>
+
+      <div style="display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:var(--sp-6)" class="overview-grid">
+
+        <!-- Savings goals -->
+        <section class="card card-pad">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--sp-5)">
+            <h2 class="card-title">Your Savings Goals</h2>
+            <a class="btn btn-ghost btn-sm" href="savings-list.html">View all</a>
+          </div>
+
+          <a href="savings-detail.html" style="display:block; text-decoration:none; color:inherit">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom: var(--sp-2)">
+              <span class="small" style="font-weight:500">Savings Vault</span>
+              <span class="small money tabular">$24,000 <span class="faint">/ $36,000</span></span>
+            </div>
+            <div class="progress" style="margin-bottom: var(--sp-2)"><div class="progress-fill" style="width:67%"></div></div>
+            <div class="xsmall faint">67% · goal by 31 Dec 2026 · auto-paused</div>
+          </a>
+
+          <hr class="hairline" style="margin: var(--sp-6) 0">
+
+          <a href="savings-detail.html" style="display:block; text-decoration:none; color:inherit">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom: var(--sp-2)">
+              <span class="small" style="font-weight:500">Emergency Fund</span>
+              <span class="small money tabular">$1,400 <span class="faint">/ $5,000</span></span>
+            </div>
+            <div class="progress" style="margin-bottom: var(--sp-2)"><div class="progress-fill warning" style="width:28%"></div></div>
+            <div class="xsmall faint">28% · goal by 30 Apr 2027</div>
+          </a>
+
+          <div class="empty-state hide-mobile" style="padding: var(--sp-8) 0 0">
+            <a class="btn btn-secondary btn-sm" href="savings-new.html" style="text-decoration:none">+ New goal</a>
+          </div>
+        </section>
+
+        <!-- Recent transactions -->
+        <section class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding: var(--sp-6) var(--sp-6) 0">
+            <h2 class="card-title">Recent Transactions</h2>
+            <a class="btn btn-ghost btn-sm" href="transactions-list.html">View all</a>
+          </div>
+          <div class="table-wrap" style="margin-top: var(--sp-3)">
+            <table class="table">
+              <thead>
+                <tr><th>Description</th><th>Date</th><th style="text-align:right">Amount</th><th style="text-align:right">Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="avatar" aria-hidden="true">MK</span> Transfer to Maya Kasim</td>
+                  <td class="small subdued">22 Sep</td>
+                  <td class="num txn-amount-neg" style="text-align:right">-$120.00</td>
+                  <td style="text-align:right"><span class="badge badge-success">Completed</span></td>
+                </tr>
+                <tr>
+                  <td><span class="avatar" aria-hidden="true">+</span> Wallet Top-Up</td>
+                  <td class="small subdued">21 Sep</td>
+                  <td class="num txn-amount-pos" style="text-align:right">+$500.00</td>
+                  <td style="text-align:right"><span class="badge badge-success">Completed</span></td>
+                </tr>
+                <tr>
+                  <td><span class="avatar" aria-hidden="true">AW</span> ATM Withdrawal</td>
+                  <td class="small subdued">20 Sep</td>
+                  <td class="num txn-amount-neg" style="text-align:right">-$60.00</td>
+                  <td style="text-align:right"><span class="badge badge-success">Completed</span></td>
+                </tr>
+                <tr>
+                  <td><span class="avatar" aria-hidden="true">CE</span> Transfer to Chuka Eze</td>
+                  <td class="small subdued">19 Sep</td>
+                  <td class="num txn-amount-neg" style="text-align:right">-$2,400.00</td>
+                  <td style="text-align:right"><span class="badge badge-warning">Processing</span></td>
+                </tr>
+                <tr>
+                  <td><span class="avatar" aria-hidden="true">AB</span> Transfer to Amina Bello</td>
+                  <td class="small subdued">18 Sep</td>
+                  <td class="num txn-amount-neg" style="text-align:right">-$840.00</td>
+                  <td style="text-align:right"><span class="badge badge-danger">Failed</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="theme.js"></script>
+</body>
+</html>

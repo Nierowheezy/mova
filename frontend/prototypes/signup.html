@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mova · Sign up</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div style="display:flex; min-height:100vh; flex-wrap:wrap">
+
+  <!-- ============ Brand panel ============ -->
+  <div style="flex:1 1 440px; background:#111113; color:#fff; padding:var(--sp-10); display:flex; flex-direction:column; justify-content:space-between; gap:var(--sp-12)">
+    <div style="display:flex; align-items:center; gap:var(--sp-2)">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="22" height="22" rx="6" fill="var(--accent)"/>
+        <path d="M5 16V8l7 6 7-6v8" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-size:1.125rem; font-weight:600; letter-spacing:-0.03em; color:#fff">Mova</span>
+    </div>
+
+    <div style="max-width:22rem">
+      <p style="font-size:clamp(1.75rem,2.4vw,2.25rem); font-weight:600; letter-spacing:-0.03em; line-height:1.15; color:#fff">No fees. No branches. Just your money, moving.</p>
+      <div class="mono xsmall" style="margin-top:var(--sp-8); color:#9a9ba6">Free transfers · No monthly fees · No minimum</div>
+    </div>
+
+    <div class="mono xsmall" style="color:#6a6a76">Bank-grade KYC · 256-bit encryption</div>
+  </div>
+
+  <!-- ============ Create account ============ -->
+  <div style="flex:1 1 480px; min-width:0; display:flex; flex-direction:column; padding:var(--sp-6) var(--sp-8) var(--sp-8)">
+    <div style="display:flex; justify-content:flex-end">
+      <div class="ts-wrap">
+  <button class="ts-btn" aria-label="Theme" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+  <div class="ts-popover" role="menu">
+    <div class="ts-label">Appearance</div>
+    <button class="ts-option active" data-theme-choice="light" role="menuitem" aria-selected="true">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Light
+    </button>
+    <button class="ts-option" data-theme-choice="dark" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Dark
+    </button>
+    <div class="ts-divider"></div>
+    <button class="ts-option" data-theme-choice="system" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      System
+    </button>
+  </div>
+</div>
+
+    <div style="width:100%; max-width:24rem; margin:auto">
+      <h1 style="font-size:clamp(1.6rem,2.2vw,2rem); letter-spacing:-0.03em">Create your account</h1>
+      <p class="subdued" style="margin-top:var(--sp-2)">Open a free account in minutes.</p>
+
+      <form style="display:flex; flex-direction:column; gap:var(--sp-4); margin-top:var(--sp-8)" action="#">
+        <div class="field">
+          <label class="label" for="full-name">Full name</label>
+          <input class="input" id="full-name" name="full-name" type="text" placeholder="Ada Obi" autocomplete="name">
+        </div>
+        <div class="field">
+          <label class="label" for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" placeholder="Create a password" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label class="label" for="password-confirm">Confirm password</label>
+          <input class="input" id="password-confirm" name="password-confirm" type="password" placeholder="Repeat your password" autocomplete="new-password">
+        </div>
+        <p class="small subdued">You'll verify your identity in the next step.</p>
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      </form>
+
+      <hr class="hairline" style="margin:var(--sp-6) 0">
+      <p class="small subdued" style="text-align:center">Already have an account? <a href="login.html">Sign in</a></p>
+    </div>
+
+    <div class="small mono faint" style="text-align:center">By signing up you agree to our Terms &amp; Privacy Policy</div>
+  </div>
+
+</div>
+<script src="theme.js"></script>
+</body>
+</html>

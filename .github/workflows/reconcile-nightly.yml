@@ -1,0 +1,48 @@
+# Nightly money-reconciliation against the PRODUCTION database.
+#
+# Runs `pnpm db:reconcile` every night. If any wallet/goal/platform drifts
+# from its ledger account, the script:
+#   1. POSTs the JSON drift report to OPS_ALERT_WEBHOOK (slack/webhook)
+#   2. exits 1 -> this run is marked FAILED -> GitHub Actions pings you.
+#
+# Requirements (set once in repo Settings -> Secrets and variables -> Actions):
+#   PROD_DATABASE_URL   - the deployed Render Postgres URL (read-only is ideal)
+#   OPS_ALERT_WEBHOOK   - where the drift alert should land (optional)
+
+name: nightly-reconcile
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # 03:17 UTC daily
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-node
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.17.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: backend-node/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run reconciliation (alerts on drift, exit 1 = page on-call)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          ALERT_WEBHOOK_URL: ${{ secrets.OPS_ALERT_WEBHOOK }}
+        run: pnpm db:reconcile

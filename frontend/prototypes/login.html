@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mova · Login</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div style="display:flex; min-height:100vh; flex-wrap:wrap">
+
+  <!-- ============ Brand panel ============ -->
+  <div style="flex:1 1 440px; background:#111113; color:#fff; padding:var(--sp-10); display:flex; flex-direction:column; justify-content:space-between; gap:var(--sp-12)">
+    <div style="display:flex; align-items:center; gap:var(--sp-2)">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="22" height="22" rx="6" fill="var(--accent)"/>
+        <path d="M5 16V8l7 6 7-6v8" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-size:1.125rem; font-weight:600; letter-spacing:-0.03em; color:#fff">Mova</span>
+    </div>
+
+    <div style="max-width:22rem">
+      <p style="font-size:clamp(1.75rem,2.4vw,2.25rem); font-weight:600; letter-spacing:-0.03em; line-height:1.15; color:#fff">Your money, moving at the speed of now.</p>
+      <div style="margin-top:var(--sp-8)">
+        <div class="mono xsmall" style="color:#9a9ba6; text-transform:uppercase; letter-spacing:0.06em">Total balance</div>
+        <div class="money" style="margin-top:var(--sp-1); font-size:1.75rem; font-weight:600; letter-spacing:-0.03em; color:#fff">$82,450.13</div>
+      </div>
+    </div>
+
+    <div class="mono xsmall" style="color:#6a6a76">Deposits safeguarded with licensed partners</div>
+  </div>
+
+  <!-- ============ Sign in ============ -->
+  <div style="flex:1 1 480px; min-width:0; display:flex; flex-direction:column; padding:var(--sp-6) var(--sp-8) var(--sp-8)">
+    <div style="display:flex; justify-content:flex-end">
+      <div class="ts-wrap">
+  <button class="ts-btn" aria-label="Theme" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+  <div class="ts-popover" role="menu">
+    <div class="ts-label">Appearance</div>
+    <button class="ts-option active" data-theme-choice="light" role="menuitem" aria-selected="true">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Light
+    </button>
+    <button class="ts-option" data-theme-choice="dark" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Dark
+    </button>
+    <div class="ts-divider"></div>
+    <button class="ts-option" data-theme-choice="system" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      System
+    </button>
+  </div>
+</div>
+
+    <div style="width:100%; max-width:24rem; margin:auto">
+      <h1 style="font-size:clamp(1.6rem,2.2vw,2rem); letter-spacing:-0.03em">Welcome back</h1>
+      <p class="subdued" style="margin-top:var(--sp-2)">Sign in to your Mova account.</p>
+
+      <form style="display:flex; flex-direction:column; gap:var(--sp-4); margin-top:var(--sp-8)" action="#">
+        <div class="field">
+          <label class="label" for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <input class="input input-error" id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" aria-invalid="true">
+          <span class="error-text">Email or password is incorrect</span>
+          <div style="display:flex; justify-content:flex-end">
+            <a class="small" href="#">Forgot password?</a>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+
+      <hr class="hairline" style="margin:var(--sp-6) 0">
+      <p class="small subdued" style="text-align:center">New to Mova? <a href="signup.html">Create an account</a></p>
+    </div>
+
+    <div class="small mono faint" style="text-align:center">Protected by bank-grade encryption · PCI-DSS</div>
+  </div>
+
+</div>
+<script src="theme.js"></script>
+</body>
+</html>

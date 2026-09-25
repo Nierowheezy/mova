@@ -1,0 +1,91 @@
+# Local dev / single-host deploy stack: Postgres + the API.
+#
+#   docker compose up --build
+#
+# For production you normally don't run Postgres in a container on the same
+# host as the API — use a managed database (RDS/Neon/Cloud SQL), run `prisma
+# migrate deploy` as its own job, and scale the API horizontally behind a
+# load balancer. This compose file is the "everything on one machine" path.
+name: fintech-banking-app
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin1234}
+      POSTGRES_DB: fintech_dev
+    ports:
+      - "5433:5432" # host 5433 keeps the loopback dev setup unchanged
+    volumes:
+      - fintech_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fintech_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      # Inside the compose network the app reaches Postgres as `db`.
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-admin1234}@db:5432/fintech_dev?schema=public
+      UPLOAD_DIR: /app/uploads/
+      # Expose Prometheus metrics for the local monitoring stack (see below).
+      METRICS_ENABLED: "true"
+      # Optional: SENTRY_DSN will be picked up from .env if present
+      # (free tier / GlitchTip / self-hosted all accepted — see docs/19).
+    ports:
+      - "8000:8000"
+    volumes:
+      - fintech_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  # ─── Free observability stack (open source, self-hosted) ─────────────────
+  # Prometheus scrapes GET /metrics from the API; Grafana visualizes it.
+  # See docs/19-observability-and-runbooks.md.
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - fintech_prom:/prometheus
+    depends_on:
+      app:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:11.8.0
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Change this on any shared machine.
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - fintech_grafana:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  fintech_pgdata:
+  fintech_uploads:
+  fintech_prom:
+  fintech_grafana:

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mova · Savings Vault</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="shell">
+
+  <!-- ================= SIDEBAR (shared chrome) ================= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a class="brand" href="overview.html">
+        <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="22" height="22" rx="6" fill="var(--text)"/>
+          <path d="M5 16V8l7 6 7-6v8" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="name">Mova</span>
+      </a>
+      <button class="tside-toggle" aria-label="Collapse sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-search">
+      <input class="input" placeholder="Search" type="text" aria-label="Search">
+    </div>
+
+    <nav aria-label="Main">
+      <span class="nav-group-label">Menu</span>
+      <a class="nav-link" href="overview.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="nav-label">Overview</span>
+      </a>
+      <a class="nav-link" href="transactions-list.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="4" x2="8" y2="9"/></svg>
+        <span class="nav-label">Transactions</span>
+      </a>
+      <a class="nav-link" href="transfers-list.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><polyline points="7 7 17 7 17 17"/></svg>
+        <span class="nav-label">Transfers</span>
+      </a>
+      <a class="nav-link active" href="savings-list.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.5" fill="currentColor"/></svg>
+        <span class="nav-label">Savings</span>
+      </a>
+
+      <span class="nav-group-label">Manage</span>
+      <a class="nav-link" href="beneficiaries.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-label">Beneficiaries</span>
+      </a>
+      <a class="nav-link" href="notifications.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="nav-label">Notifications</span>
+      </a>
+      <a class="nav-link" href="kyc.html">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/><path d="M9 6h6"/></svg>
+        <span class="nav-label">KYC</span>
+      </a>
+      <a class="nav-link nav-muted" href="#" aria-disabled="true">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        <span class="nav-label">Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="side-card">
+        <div class="sc-title">New features available!</div>
+        <div class="sc-text">Check out the new dashboard view. Pages now load faster.</div>
+        <div class="sc-img" aria-hidden="true"></div>
+        <div class="sc-actions">
+          <a class="sc-dismiss" href="#">Dismiss</a>
+          <a class="sc-link" href="#">What's new?</a>
+        </div>
+      </div>
+      <a class="user-chip" href="#">
+        <div class="avatar" aria-hidden="true">AO</div>
+        <div>
+          <div class="uc-name">Ada Obi</div>
+          <div class="uc-email">ada@movaa.app</div>
+        </div>
+        <svg class="uc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title">Savings</div>
+        <div class="page-sub">Wednesday, 23 September 2026</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="ts-wrap">
+  <button class="ts-btn" aria-label="Theme" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+  <div class="ts-popover" role="menu">
+    <div class="ts-label">Appearance</div>
+    <button class="ts-option active" data-theme-choice="light" role="menuitem" aria-selected="true">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Light
+    </button>
+    <button class="ts-option" data-theme-choice="dark" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Dark
+    </button>
+    <div class="ts-divider"></div>
+    <button class="ts-option" data-theme-choice="system" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      System
+    </button>
+  </div>
+</div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <a href="savings-list.html" class="small">&larr; All goals</a>
+          <div style="display:flex; align-items:center; gap:var(--sp-3); margin-top:var(--sp-2)">
+            <h1>Savings Vault</h1>
+            <span class="badge badge-neutral">Paused</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress hero -->
+      <section class="card card-pad" style="margin-bottom:var(--sp-6)">
+        <div style="display:flex; align-items:baseline; gap:var(--sp-3); flex-wrap:wrap">
+          <span class="money" style="font-size:2.25rem; font-weight:600; letter-spacing:-0.03em">$24,000</span>
+          <span class="faint">of <span class="money">$36,000</span> target</span>
+        </div>
+        <div class="progress" style="margin-top:var(--sp-4)"><div class="progress-fill" style="width:67%"></div></div>
+        <hr class="hairline" style="margin-top:var(--sp-5)">
+        <div class="small subdued" style="display:flex; gap:var(--sp-8); flex-wrap:wrap; margin-top:var(--sp-4)">
+          <span>67% complete</span>
+          <span>Goal by 31 Dec 2026</span>
+          <span><span class="money">$12,000</span> to go</span>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <section class="card card-pad" style="margin-bottom:var(--sp-6)">
+        <div style="display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap">
+          <label class="label" for="add-amount" style="white-space:nowrap">Add funds</label>
+          <input class="input money" id="add-amount" type="text" inputmode="decimal" value="500.00" style="width:8.5rem">
+          <button type="button" class="btn btn-primary money">Add $500.00</button>
+        </div>
+        <hr class="hairline" style="margin:var(--sp-5) 0">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); flex-wrap:wrap">
+          <span class="small subdued">Auto top-up is paused &mdash; <a class="small" href="#">Resume</a></span>
+          <a class="btn btn-secondary btn-sm" href="withdraw-wallet.html">Withdraw from goal</a>
+        </div>
+      </section>
+
+      <!-- Goal transactions -->
+      <section class="card">
+        <div style="padding:var(--sp-6) var(--sp-6) 0">
+          <h2 class="card-title">Goal transactions</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Reference</th><th>Note</th><th>Date</th><th style="text-align:right">Amount</th><th style="text-align:right">Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono small">SV-2026-09-17-0053</td>
+                <td class="small">Monthly top-up</td>
+                <td class="small subdued">17 Sep</td>
+                <td class="money txn-amount-neg" style="text-align:right">-$700.00</td>
+                <td style="text-align:right"><span class="badge badge-success">Completed</span></td>
+              </tr>
+              <tr>
+                <td class="mono small">SV-2026-08-17-0041</td>
+                <td class="small">Monthly top-up</td>
+                <td class="small subdued">17 Aug</td>
+                <td class="money txn-amount-neg" style="text-align:right">-$700.00</td>
+                <td style="text-align:right"><span class="badge badge-success">Completed</span></td>
+              </tr>
+              <tr>
+                <td class="mono small">SV-2026-07-17-0038</td>
+                <td class="small">Round-ups</td>
+                <td class="small subdued">17 Jul</td>
+                <td class="money txn-amount-neg" style="text-align:right">-$500.00</td>
+                <td style="text-align:right"><span class="badge badge-success">Completed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="small subdued" style="margin-top:var(--sp-5)">Have questions? <a href="#">See the FAQ</a></p>
+    </main>
+  </div>
+</div>
+<script src="theme.js"></script>
+</body>
+</html>

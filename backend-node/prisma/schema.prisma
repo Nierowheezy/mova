@@ -1,0 +1,382 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// PostgreSQL supports enums!
+enum VerificationStatus {
+    PENDING
+    VERIFIED
+    REJECTED
+}
+
+enum IDType {
+    NATIONAL_ID
+    DRIVERS_LICENSE
+    PASSPORT
+}
+
+enum TransactionType {
+    DEPOSIT
+    TRANSFER
+    WITHDRAWAL
+    SAVINGS
+}
+
+enum TransactionStatus {
+    PENDING
+    SUCCESSFUL
+    FAILED
+}
+
+enum NotificationType {
+    DEPOSIT
+    TRANSFER
+    WITHDRAWAL
+    SAVINGS
+}
+
+enum UserRole {
+    USER
+    ADMIN
+    SUPPORT
+}
+
+// KYC / account tier: every hard limit (per-transaction, daily aggregate,
+// single deposit, withdrawal) is derived from the user's tier.
+//   BASIC   → default, before/without KYC approval (low limits)
+//   VERIFIED → after KYC is approved (standard limits)
+//   PREMIUM → manually promoted by ops/support for high-trust, high-volume users
+enum AccountTier {
+    BASIC
+    VERIFIED
+    PREMIUM
+}
+
+// Severity of an AML rule hit. CRITICAL typically accompanies freezing.
+enum AmlSeverity {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}
+
+// Review lifecycle of an AML flag.
+enum AmlFlagStatus {
+    OPEN
+    UNDER_REVIEW
+    DISMISSED
+    ESCALATED
+}
+
+model User {
+    id              Int       @id @default(autoincrement())
+    email           String    @unique
+    username        String    @unique
+    password        String
+    transactionPin  String?   @map("transaction_pin")
+    createdAt       DateTime  @default(now()) @map("created_at")
+    updatedAt       DateTime  @updatedAt @map("updated_at")
+    stripeAccountId String?   @unique @map("stripe_account_id")
+    emailVerified   DateTime? @map("email_verified")
+
+    // 2FA fields
+    twoFactorSecret  String? @map("two_factor_secret")
+    twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
+    backupCodes      Json?   @map("backup_codes") // stores array of hashed backup codes (strings)
+
+    // Transaction PIN brute-force protection
+    pinFailedAttempts Int       @default(0) @map("pin_failed_attempts")
+    pinLockedUntil    DateTime? @map("pin_locked_until")
+
+    // ADMIN FIELDS
+    role         UserRole  @default(USER)
+    isActive     Boolean   @default(true)
+    isFrozen     Boolean   @default(false)
+    frozenReason String?   @map("frozen_reason")
+    frozenAt     DateTime? @map("frozen_at")
+
+    // KYC tier — drives fraud-control limits (see src/config/limits.ts)
+    tier AccountTier @default(BASIC)
+
+    // AML risk flags raised against this user (see src/services/aml.service.ts)
+    amlFlags AmlFlag[]
+
+    // Relations
+    wallet                Wallet?
+    kycProfile            KYC?
+    sentBeneficiaries     Beneficiary[]       @relation("UserBeneficiaries")
+    receivedBeneficiaries Beneficiary[]       @relation("UserBenefactors")
+    sentTransactions      Transaction[]       @relation("SentTransactions")
+    receivedTransactions  Transaction[]       @relation("ReceivedTransactions")
+    notifications         Notification[]
+    refreshTokens         RefreshToken[]
+    loginAttempts         LoginAttempt[]
+    passwordHistory       PasswordHistory[]
+    auditLogs             AuditLog[]
+    verificationTokens    VerificationToken[] // one-to-many
+
+    @@map("users")
+}
+
+model VerificationToken {
+    id        Int      @id @default(autoincrement())
+    token     String   @unique
+    userId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    type      String // 'EMAIL_VERIFICATION', 'PASSWORD_RESET'
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+
+    @@index([token])
+    @@map("verification_tokens")
+}
+
+model RefreshToken {
+    id        Int      @id @default(autoincrement())
+    token     String   @unique
+    userId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    family    String // Family ID groups related tokens together
+    used      Boolean  @default(false) // Was this specific token used?
+    createdAt DateTime @default(now())
+    expiresAt DateTime
+
+    @@index([userId])
+    @@index([family])
+    @@map("refresh_tokens")
+}
+
+model LoginAttempt {
+    id        Int      @id @default(autoincrement())
+    email     String
+    userId    Int? // Will be null for failed attempts on non-existent accounts
+    success   Boolean
+    ip        String?
+    timestamp DateTime @default(now())
+    user      User?    @relation(fields: [userId], references: [id])
+
+    @@index([email])
+    @@index([timestamp])
+    @@map("login_attempts")
+}
+
+model PasswordHistory {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    password  String // Store hashed password
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@map("password_history")
+}
+
+model KYC {
+    id                 Int                @id @default(autoincrement())
+    fullName           String             @map("full_name")
+    dateOfBirth        DateTime?          @map("date_of_birth")
+    verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+    idType             IDType             @default(NATIONAL_ID) @map("id_type")
+    idImage            String?            @map("id_image")
+    createdAt          DateTime           @default(now()) @map("created_at")
+    updatedAt          DateTime           @updatedAt @map("updated_at")
+
+    userId Int  @unique @map("user_id")
+    user   User @relation(fields: [userId], references: [id])
+
+    @@map("kyc_records")
+}
+
+model Wallet {
+    id        Int      @id @default(autoincrement())
+    walletId  String   @unique @map("wallet_id")
+    balance   Decimal  @default(0) @db.Decimal(12, 2)
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    userId Int  @unique @map("user_id")
+    user   User @relation(fields: [userId], references: [id])
+
+    transactions Transaction[]
+    savingsGoals SavingsGoal[]
+
+    @@map("wallets")
+}
+
+model Transaction {
+    id                Int               @id @default(autoincrement())
+    reference         String            @unique @default(uuid())
+    transactionType   TransactionType   @map("transaction_type")
+    status            TransactionStatus @default(PENDING)
+    amount            Decimal           @db.Decimal(12, 2)
+    externalReference String?           @map("external_reference")
+    timestamp         DateTime          @default(now())
+
+    walletId Int    @map("wallet_id")
+    wallet   Wallet @relation(fields: [walletId], references: [id])
+
+    senderId Int?  @map("sender_id")
+    sender   User? @relation("SentTransactions", fields: [senderId], references: [id])
+
+    receiverId Int?  @map("receiver_id")
+    receiver   User? @relation("ReceivedTransactions", fields: [receiverId], references: [id])
+
+    notifications Notification[]
+
+    @@map("transactions")
+}
+
+model Beneficiary {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+
+    userId Int  @map("user_id")
+    user   User @relation("UserBeneficiaries", fields: [userId], references: [id])
+
+    beneficiaryUserId Int  @map("beneficiary_user_id")
+    beneficiaryUser   User @relation("UserBenefactors", fields: [beneficiaryUserId], references: [id])
+
+    @@unique([userId, beneficiaryUserId])
+    @@map("beneficiaries")
+}
+
+model SavingsGoal {
+    id            Int       @id @default(autoincrement())
+    uuid          String    @unique @default(uuid())
+    name          String
+    targetAmount  Decimal   @map("target_amount") @db.Decimal(12, 2)
+    currentAmount Decimal   @default(0) @map("current_amount") @db.Decimal(12, 2)
+    targetDate    DateTime? @map("target_date")
+    createdAt     DateTime  @default(now()) @map("created_at")
+
+    walletId Int    @map("wallet_id")
+    wallet   Wallet @relation(fields: [walletId], references: [id])
+
+    @@map("savings_goals")
+}
+
+model Notification {
+    id        Int              @id @default(autoincrement())
+    title     String
+    message   String
+    status    NotificationType
+    isRead    Boolean          @default(false) @map("is_read")
+    timestamp DateTime         @default(now())
+
+    userId Int  @map("user_id")
+    user   User @relation(fields: [userId], references: [id])
+
+    transactionId Int?         @map("transaction_id")
+    transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+    @@map("notifications")
+}
+
+model IdempotencyKey {
+    id        String   @id @default(uuid())
+    key       String   @unique
+    userId    Int
+    response  Json // Store the successful response
+    createdAt DateTime @default(now())
+    expiresAt DateTime
+
+    @@index([userId])
+    @@index([expiresAt])
+    @@map("idempotency_keys")
+}
+
+model AuditLog {
+    id        Int      @id @default(autoincrement())
+    userId    Int // admin who performed action
+    user      User     @relation(fields: [userId], references: [id])
+    action    String // e.g., "APPROVE_KYC", "FREEZE_USER"
+    targetId  Int? // ID of affected user or KYC
+    details   Json? // extra info (reason, old value, new value)
+    ip        String?
+    userAgent String?
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@index([action])
+    @@index([createdAt])
+    @@map("audit_logs")
+}
+
+// ─── AML / transaction monitoring ──────────────────────────────────────────
+// Raised by aml.service.ts after each money movement. Flags are advisory:
+// they never block a transaction automatically in the MVP, but ops reviews
+// them in the admin dashboard (GET /api/v1/admin/aml/flags) and can escalate
+// to freezing the account / manual intervention.
+
+model AmlFlag {
+    id            Int           @id @default(autoincrement())
+    rule         String // machine-readable rule id, e.g. "LARGE_SINGLE_TX"
+    severity      AmlSeverity   @default(LOW)
+    status        AmlFlagStatus @default(OPEN)
+    details       Json? // rule inputs: amount, window sums, account age days, etc.
+    transactionId Int?          @map("transaction_id") // Transaction.reference is stored in details; this is the numeric id if linked
+    reviewedBy    Int?          @map("reviewed_by")
+    reviewedAt    DateTime?     @map("reviewed_at")
+    reviewNote    String?       @map("review_note")
+    createdAt     DateTime      @default(now()) @map("created_at")
+
+    userId Int  @map("user_id")
+    user   User @relation(fields: [userId], references: [id])
+
+    @@index([userId])
+    @@index([status])
+    @@index([rule])
+    @@index([createdAt])
+    @@map("aml_flags")
+}
+
+// ─── Double-entry ledger (immutable, append-only) ──────────────────────────
+// Every wallet balance change produces two LedgerEntry rows (DEBIT + CREDIT)
+// so that the ledger always balances and can be reconciled against wallets.
+// LedgerEntry rows MUST NEVER be updated or deleted after creation.
+
+model LedgerAccount {
+    id        Int      @id @default(autoincrement())
+    accountId String   @unique // e.g. "wallet:3", "goal:<uuid>", "platform"
+    type      String // CUSTOMER_WALLET | SAVINGS_GOAL | PLATFORM
+    balance   Decimal  @default(0) @db.Decimal(12, 2)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    entries LedgerEntry[]
+
+    @@map("ledger_accounts")
+}
+
+model LedgerEntry {
+    id           Int     @id @default(autoincrement())
+    accountId    String
+    direction    String // CREDIT | DEBIT
+    amount       Decimal @db.Decimal(12, 2)
+    currency     String  @default("usd")
+    balanceAfter Decimal @db.Decimal(12, 2) // running balance snapshot AFTER this entry
+    txRef        String // Transaction.reference this entry belongs to
+    createdAt    DateTime @default(now())
+
+    account LedgerAccount @relation(fields: [accountId], references: [accountId])
+
+    @@index([accountId, createdAt])
+    @@index([txRef])
+    @@map("ledger_entries")
+}
+
+// Deduplicates Stripe webhook events so each event is processed exactly once.
+model WebhookEvent {
+    id        Int      @id @default(autoincrement())
+    eventId   String   @unique
+    type      String
+    createdAt DateTime @default(now())
+
+    @@index([eventId])
+    @@map("webhook_events")
+}

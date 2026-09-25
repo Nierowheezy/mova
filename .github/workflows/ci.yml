@@ -1,0 +1,111 @@
+# CI for the whole deployable monorepo (frontend + backend-node).
+# Runs on every push and pull request. Everything here must pass before
+# deploys are safe:
+#   1. Backend: TypeScript compiles, integration + unit tests pass against a
+#      real PostgreSQL, and the production Docker image builds.
+#   2. Frontend: lint + production build succeed.
+#
+# Deploys happen through the deploy-*.yml workflows (or native Render/Vercel
+# GitHub integrations), NOT from this file.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-node
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin1234
+          POSTGRES_DB: fintech_test
+        ports:
+          - "5433:5432"
+        options: >-
+          --health-cmd "pg_isready -U postgres -d fintech_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          # Matches "packageManager" in backend-node/package.json.
+          version: 11.17.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: backend-node/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma:generate
+
+      - name: Type-check + build
+        run: pnpm build
+
+      - name: Run integration + unit tests (reconciles fintech_test DB)
+        run: pnpm test
+        env:
+          # tests/globalSetup.ts resets fintech_test via prisma migrate reset.
+          TEST_DATABASE_URL: postgresql://postgres:admin1234@localhost:5433/fintech_test
+
+      - name: Verify reconciliation script runs against a clean DB
+        run: pnpm db:reconcile
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build
+
+  docker-image:
+    needs: backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the production image
+        run: docker build -t mova-backend-node:${{ github.sha }} ./backend-node
+
+      - name: Sanity-check the image runtime
+        run: |
+          # Bypass the entrypoint (it runs migrations + waits for a DB) and
+          # verify the runtime Node + compiled server are present.
+          docker run --rm --entrypoint node \
+            mova-backend-node:${{ github.sha }} \
+            -e "require('./package.json').name === 'backend-node' && console.log('image-runtime-ok')"

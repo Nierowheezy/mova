@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "burnish": {
+      "source": "Nierowheezy/burnish",
+      "sourceType": "github",
+      "skillPath": "skills/burnish/SKILL.md",
+      "computedHash": "3d081f2e9712428636b3444e012fd08281889618fa4ce5c8ace6f068e81766cc"
+    }
+  }
+}

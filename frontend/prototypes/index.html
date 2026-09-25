@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mova · Prototype Gallery</title>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+<nav class="nav-landing">
+  <div class="nav-landing-inner">
+    <a href="index.html" style="display:flex; align-items:center; gap:var(--sp-2); text-decoration:none">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="22" height="22" rx="6" fill="var(--accent)"/>
+        <path d="M5 16V8l7 6 7-6v8" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-size:1.125rem; font-weight:600; letter-spacing:-0.03em; color:var(--text)">Mova prototype</span>
+    </a>
+    <div class="ts-wrap">
+  <button class="ts-btn" aria-label="Theme" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+  <div class="ts-popover" role="menu">
+    <div class="ts-label">Appearance</div>
+    <button class="ts-option active" data-theme-choice="light" role="menuitem" aria-selected="true">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Light
+    </button>
+    <button class="ts-option" data-theme-choice="dark" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Dark
+    </button>
+    <div class="ts-divider"></div>
+    <button class="ts-option" data-theme-choice="system" role="menuitem" aria-selected="false">
+      <svg class="ts-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      System
+    </button>
+  </div>
+</div>
+</nav>
+
+<main class="container" style="padding-top:var(--sp-16); padding-bottom:var(--sp-24)">
+  <div style="max-width:34rem; margin-bottom:var(--sp-12)">
+    <span class="eyebrow">Design prototype · static HTML</span>
+    <h1 class="h2" style="margin-top:var(--sp-3)">Mova — all screens</h1>
+    <p class="lead" style="margin-top:var(--sp-3)">The full-page mockups lock the Mova visual language before it's ported into the app. Every color, type, and radius value lives in <code class="mono small">theme.css</code>.</p>
+  </div>
+
+  <section>
+    <span class="nav-group-label" style="padding-left:0">Public</span>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:var(--sp-4); margin-top:var(--sp-4); margin-bottom:var(--sp-12)">
+      <a class="card card-pad" href="landing.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Landing page</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Marketing · hero, tabs, FAQ</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/ &nbsp;·&nbsp; landing.html</div>
+      </a>
+      <a class="card card-pad" href="login.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Login</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Split-screen auth</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/login</div>
+      </a>
+      <a class="card card-pad" href="signup.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Signup</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Create account · KYC notice</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/signup</div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <span class="nav-group-label" style="padding-left:0">Dashboard</span>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:var(--sp-4); margin-top:var(--sp-4)">
+      <a class="card card-pad" href="overview.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Overview</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Balance hero · goals · recent</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard</div>
+      </a>
+      <a class="card card-pad" href="transfer-new.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Send Funds</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Beneficiary · amount · review</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/transfers/new</div>
+      </a>
+      <a class="card card-pad" href="transfers-list.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Transfers</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Transfer history · statuses</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/transfers</div>
+      </a>
+      <a class="card card-pad" href="fund-wallet.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Fund Wallet</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Card top-up · summary</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/fund</div>
+      </a>
+      <a class="card card-pad" href="withdraw-wallet.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Withdraw</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Bank/card cash-out · fees</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/withdraw</div>
+      </a>
+      <a class="card card-pad" href="transactions-list.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Transactions</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Filterable ledger</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/transactions</div>
+      </a>
+      <a class="card card-pad" href="transaction-detail.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Transaction Detail</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Record · status timeline</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/transactions/:ref</div>
+      </a>
+      <a class="card card-pad" href="savings-list.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Savings Goals</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Goal cards · progress</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/savings</div>
+      </a>
+      <a class="card card-pad" href="savings-new.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">New Saving Goal</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Create goal form</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/savings/new</div>
+      </a>
+      <a class="card card-pad" href="savings-detail.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Goal Detail</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Progress · add funds</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/savings/:uuid</div>
+      </a>
+      <a class="card card-pad" href="beneficiaries.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Beneficiaries</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Saved recipients · add</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/beneficiaries</div>
+      </a>
+      <a class="card card-pad" href="notifications.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">Notifications</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Inbox · read/unread</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/notifications</div>
+      </a>
+      <a class="card card-pad" href="kyc.html" style="text-decoration:none; color:inherit">
+        <div class="small" style="font-weight:600">KYC</div>
+        <div class="xsmall faint" style="margin-top:var(--sp-1)">Identity submission · status</div>
+        <div class="mono xsmall subdued" style="margin-top:var(--sp-3)">/dashboard/kyc</div>
+      </a>
+    </div>
+  </section>
+
+  <hr class="hairline" style="margin:var(--sp-16) 0 var(--sp-8)">
+  <div class="xsmall faint" style="max-width:44ch">
+    Mova design DNA — Vercel-style black & white only, hairline borders over shadows, 12px radius, Geist Sans + Geist Mono. Toggle Light / Dark / System on any screen.
+  </div>
+</main>
+
+<script src="theme.js"></script>
+</body>
+</html>

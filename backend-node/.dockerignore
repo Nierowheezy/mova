@@ -1,0 +1,22 @@
+# Build context exclusions — keep the image lean and do not bake secrets
+node_modules
+dist
+uploads
+.env
+.env.*
+!.env.example
+
+# Source / dev artifacts not needed in the image
+tests
+docs
+code_progress
+playwright-report
+.pnpm-store
+
+# VCS / editor / OS noise
+.git
+.gitignore
+.vscode
+*.md
+.DS_Store
+review-*.png

@@ -1,0 +1,17 @@
+# Prometheus scrape config for the fintech API.
+# Prometheus + Grafana are fully open-source (free to self-host). See
+# docs/19-observability-and-runbooks.md for the whole free observability plan.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "fintech-api"
+    metrics_path: /metrics
+    static_configs:
+      # "app" is the compose service name; the API listens on :8000 inside the
+      # compose network. The API exposes Prometheus metrics when the container
+      # runs with METRICS_ENABLED=true (already set in docker-compose.yml).
+      - targets: ["app:8000"]
+        labels:
+          service: backend-node

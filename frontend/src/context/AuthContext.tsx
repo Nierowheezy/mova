@@ -5,6 +5,7 @@ interface AuthPayload {
     email: string;
     password: string;
     username?: string;
+    name?: string;
     confirmPassword?: string;
 }
 
@@ -90,6 +91,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
             email: payload.email,
             password: payload.password,
             confirmPassword: payload.confirmPassword ?? payload.password,
+            name: payload.name,
         });
         setAccessToken(data.data.accessToken);
         await fetchCurrentUser();

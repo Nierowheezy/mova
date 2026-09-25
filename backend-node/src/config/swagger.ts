@@ -1,5 +1,11 @@
 import swaggerJsdoc from "swagger-jsdoc";
 
+// Public API base URL for the OpenAPI `servers` list. Set PUBLIC_API_URL when
+// the app is hosted somewhere other than the default Render deployment.
+const isProduction = process.env.NODE_ENV === "production";
+const productionUrl =
+  process.env.PUBLIC_API_URL || "https://mova-api-z5gh.onrender.com/api/v1";
+
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -27,6 +33,11 @@ Fintech guarantees implemented:
 `,
     },
     servers: [
+      // Production first so a deployed instance's "Try it out" targets the
+      // live API by default, not localhost.
+      ...(isProduction
+        ? [{ url: productionUrl, description: "Production" }]
+        : []),
       { url: "http://localhost:8000/api/v1", description: "Local development" },
     ],
     tags: [

@@ -42,6 +42,12 @@ browser all respond correctly.
 
 ---
 
+## Changelog
+
+Release history and versioning live in [CHANGELOG.md](CHANGELOG.md).
+
+---
+
 ## What Mova does
 
 Mova is a neobank-style wallet with the features people expect from a modern

@@ -40,10 +40,27 @@ enum NotificationType {
     SAVINGS
 }
 
+// Identity of an account, and therefore what it may do.
+//
+// USER is a bank *customer*: it holds no operations permission at all. The other
+// seven are the internal staff roles from the product plan. ADMIN and SUPPORT
+// predate the Work layer and are kept under those names so existing users and
+// the admin middleware are untouched - ADMIN is the plan's "Administrator",
+// SUPPORT is its "Customer Service". Renaming them would mean
+// ALTER TYPE ... RENAME VALUE against live data for naming symmetry only.
+//
+// The permission each role implies is not here: it is code, in
+// src/modules/operations/rbac/permissions.ts. Roles are a stored fact,
+// permissions are policy, and policy should be reviewable in a diff.
 enum UserRole {
     USER
     ADMIN
     SUPPORT
+    OPERATIONS_MANAGER
+    FRAUD_ANALYST
+    KYC_REVIEWER
+    LOAN_OFFICER
+    COMPLIANCE_OFFICER
 }
 
 // KYC / account tier: every hard limit (per-transaction, daily aggregate,

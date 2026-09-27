@@ -1,3 +1,4 @@
+import { UserRole } from "@prisma/client";
 import { prisma } from "../../../config/database";
 
 export class AdminUserService {
@@ -142,10 +143,10 @@ export class AdminUserService {
     return user;
   }
 
-  async changeUserRole(userId: number, role: string) {
+  async changeUserRole(userId: number, role: UserRole) {
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { role: role as any },
+      data: { role },
     });
 
     return user;

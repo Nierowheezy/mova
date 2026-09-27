@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
+import { UserRole } from "@prisma/client";
 import { AdminUserService } from "../services/user.service";
 import { AuditService } from "../../../services/audit.service";
+
+/** Type guard over the Prisma enum, so the check below stays exhaustive. */
+const isUserRole = (value: string): value is UserRole =>
+  (Object.values(UserRole) as string[]).includes(value);
 
 const userService = new AdminUserService();
 const audit = new AuditService();
@@ -112,7 +117,11 @@ export class AdminUserController {
       });
     }
 
-    if (!["USER", "ADMIN", "SUPPORT"].includes(role)) {
+    // Validated against the live enum rather than a hand-written list, so the
+    // role API cannot drift behind the schema: widening UserRole (feature 2
+    // added the five operational staff roles) is otherwise invisible here and
+    // those roles would be assignable only by direct SQL.
+    if (typeof role !== "string" || !isUserRole(role)) {
       return res.status(400).json({
         success: false,
         error: { code: "INVALID_ROLE", message: "Invalid role" },

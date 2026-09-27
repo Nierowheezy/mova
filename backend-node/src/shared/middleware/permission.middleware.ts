@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { UserRole } from "@prisma/client";
 import { prisma } from "../../config/database";
+import { AppError } from "../utils/AppError";
+import { getChildLogger } from "../utils/logger";
 import { hasPermission, type Permission } from "../../modules/operations/rbac/permissions";
 
 /**
@@ -56,19 +58,53 @@ async function authorize(
     return false;
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  });
+  // The role is read as text rather than through the typed client on purpose.
+  // `findUnique` deserializes the column into the generated enum type and
+  // *throws* on a value that type does not declare, so a database holding a role
+  // this build has not heard of would fail the read rather than reach the
+  // permission check - a 500 from the lookup, not a 403 from the policy. Reading
+  // it as text keeps the two failures apart: a database outage still surfaces as
+  // an error, while an unclassifiable role reaches `permissionsFor` and is
+  // answered as the policy decision it is.
+  const rows = await prisma.$queryRaw<{ role: string }[]>`
+    SELECT "role" FROM "users" WHERE "id" = ${userId}
+  `;
+  const role = rows[0]?.role;
 
   // A token that names a user who no longer exists is forbidden, not
   // unauthorized: the request was authenticated, the subject is just gone.
-  if (!user || !isAllowed(user.role)) {
+  if (!role) {
     forbidden(res, denied);
     return false;
   }
 
-  return true;
+  try {
+    if (isAllowed(role as UserRole)) {
+      return true;
+    }
+  } catch (err) {
+    // A role this build cannot classify: the database is ahead of the deployed
+    // code. That is a deployment problem rather than a user problem, so it gets
+    // its own error code and is logged at warn with the role and request id
+    // attached. It deliberately does not go through the central errorHandler: an
+    // authorization denial is a decision rather than an exception, and a stack
+    // trace per denial desensitises real errors. See coding-standards.md.
+    if (err instanceof AppError) {
+      getChildLogger(req).warn(
+        { event: "unknown_role", role, userId, code: err.code },
+        err.message,
+      );
+      res.status(err.statusCode).json({
+        success: false,
+        error: { code: err.code, message: err.message },
+      });
+      return false;
+    }
+    throw err;
+  }
+
+  forbidden(res, denied);
+  return false;
 }
 
 /**

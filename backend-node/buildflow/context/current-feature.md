@@ -161,7 +161,7 @@ strings, so they are `verb.noun` and never renamed without a plan edit.
 | `queue.manage` | create, edit, deactivate queues; set default SLA | OPERATIONS_MANAGER, ADMIN |
 | `case.view` | see cases | all staff |
 | `case.assign` | assign or reassign a case or task | OPERATIONS_MANAGER, FRAUD_ANALYST, ADMIN |
-| `case.resolve` | resolve with a recorded reason | OPERATIONS_MANAGER, FRAUD_ANALYST, KYC_REVIEWER, LOAN_OFFICER, SUPPORT, ADMIN |
+| `case.resolve` | resolve with a recorded reason | OPERATIONS_MANAGER, FRAUD_ANALYST, KYC_REVIEWER, LOAN_OFFICER, SUPPORT, COMPLIANCE_OFFICER, ADMIN |
 | `case.escalate` | escalate out of the queue | OPERATIONS_MANAGER, FRAUD_ANALYST, COMPLIANCE_OFFICER, ADMIN |
 | `alert.view` | the "Needs Attention" stream | OPERATIONS_MANAGER, FRAUD_ANALYST, KYC_REVIEWER, COMPLIANCE_OFFICER, SUPPORT, ADMIN |
 | `alert.acknowledge` | triage an alert into a case | OPERATIONS_MANAGER, FRAUD_ANALYST, KYC_REVIEWER, ADMIN |

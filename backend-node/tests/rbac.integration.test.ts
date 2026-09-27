@@ -160,10 +160,56 @@ function app_(guard: RequestHandler, withAuthenticate: boolean) {
   return probe;
 }
 
-const probe = (probeApp: express.Express, user?: TestUser) =>
-  request(probeApp)
-    .get("/probe")
-    .set("Authorization", user ? bearerToken(user.id, user.email) : "");
+const probe = (probeApp: express.Express, user?: TestUser) => {
+  const token = user ? bearerToken(user.id, user.email) : "";
+  recordSign(token.replace(/^Bearer /, ""));
+  return request(probeApp).get("/probe").set("Authorization", token);
+};
+
+/**
+ * Diagnostics for the one assertion that has ever failed without explaining
+ * itself.
+ *
+ * A 401 in this suite can only mean `jwt.verify` rejected the token, and the
+ * only ways that happens are a bad signature, a wrong secret, or an expiry. The
+ * first two are constant across the run, so if this ever fails again the
+ * interesting question is always the third: was the token actually expired, and
+ * by how much. These fields answer that without printing a secret or a full
+ * token.
+ */
+const lastSign = { at: 0, exp: 0, header: "" };
+
+function recordSign(token: string): void {
+  lastSign.at = Date.now();
+  lastSign.header = token;
+  try {
+    const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString());
+    lastSign.exp = typeof payload.exp === "number" ? payload.exp : 0;
+  } catch {
+    lastSign.exp = 0;
+  }
+}
+
+/** The Authorization header with the signature elided, so a log line is safe. */
+function maskedHeader(token: string): string {
+  const [header, payload, signature] = token.split(".");
+  if (!signature) return "<unparseable>";
+  return `Bearer ${header}.${payload}.${signature.slice(0, 6)}…${signature.slice(-4)}`;
+}
+
+function signDiagnostics(): string {
+  const now = Date.now();
+  const expMs = lastSign.exp * 1000;
+  const ageMs = now - lastSign.at;
+  const skewMs = expMs - now;
+  return [
+    `signed ${ageMs}ms before the assertion`,
+    `exp claim ${new Date(expMs).toISOString()}`,
+    `now       ${new Date(now).toISOString()}`,
+    skewMs < 0 ? `EXPIRED ${-skewMs}ms ago` : `expires in ${skewMs}ms`,
+    `header    ${maskedHeader(lastSign.header)}`,
+  ].join(" | ");
+}
 
 async function asRole(role: UserRole): Promise<TestUser> {
   const user = await createUser();
@@ -225,9 +271,13 @@ describe("requirePermission", () => {
       for (const permission of PERMISSIONS) {
         const user = await asRole(role);
         const res = await probe(guardedApp(requirePermission(permission)), user);
-        expect(res.status, `${role} probing ${permission}`).toBe(
-          hasPermission(role, permission) ? 200 : 403,
-        );
+        expect(
+          res.status,
+          [
+            `${role} probing ${permission} -> ${JSON.stringify(res.body)}`,
+            signDiagnostics(),
+          ].join("\n"),
+        ).toBe(hasPermission(role, permission) ? 200 : 403);
       }
     }
   });
@@ -323,3 +373,158 @@ describe("legacy role guards keep their exact behaviour", () => {
     expect(res.body.error.code).toBe("FORBIDDEN");
   });
 });
+
+/**
+ * F-01 - a role in the database that this build has no row for.
+ *
+ * Reproduced the only way it can really happen: the migration runs before the
+ * code that knows the new roles, which is the normal order during a rolling
+ * deploy. Anyone holding the new role is then a role the deployed build cannot
+ * classify. The requirement is a 403 with a code that names the cause, not a
+ * 500 from indexing an object that has no such key.
+ */
+describe("a role value this build does not know", () => {
+  const UNKNOWN_LABEL = "ROLLOUT_PENDING";
+  const LOAN_REVIEW_APP = guardedApp(requirePermission("loan.review"));
+
+  beforeAll(async () => {
+    // Outside a transaction block, which is why this is two statements.
+    await prisma.$executeRawUnsafe(`ALTER TYPE "UserRole" ADD VALUE '${UNKNOWN_LABEL}'`);
+  });
+
+  async function asUnknownRole(): Promise<TestUser> {
+    const user = await createUser();
+    // Raw SQL because the generated client cannot name a value its own enum
+    // type does not declare - which is the whole point of the scenario.
+    await prisma.$executeRawUnsafe(
+      `UPDATE "users" SET role = '${UNKNOWN_LABEL}' WHERE id = ${user.id}`,
+    );
+    return user;
+  }
+
+  it("answers 403 UNKNOWN_ROLE rather than failing with a 500", async () => {
+    const user = await asUnknownRole();
+
+    const res = await probe(LOAN_REVIEW_APP, user);
+
+    expect(res.status, JSON.stringify(res.body)).toBe(403);
+    expect(res.body.error.code).toBe("UNKNOWN_ROLE");
+  });
+
+  it("fails closed on requireAdmin too, so a new role is never a free pass", async () => {
+    // The dangerous failure mode is not the 500. It would be treating an
+    // unclassifiable role as "not explicitly denied" and letting it through.
+    const res = await probe(guardedApp(requireAdmin), await asUnknownRole());
+
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("UNKNOWN_ROLE");
+  });
+
+  it("keeps the message pointed at the deployment, not at the user", async () => {
+    // The operator reading a 3am log needs to know this is a build behind its
+    // own migration, not a customer who did something wrong.
+    const res = await probe(LOAN_REVIEW_APP, await asUnknownRole());
+
+    expect(res.body.error.message).toContain(UNKNOWN_LABEL);
+    expect(res.body.error.message).not.toMatch(/required|permitted/i);
+  });
+
+  it("leaves a known role unaffected once the unknown one is gone", async () => {
+    // Proof the added enum label did not widen or break the matrix. The label
+    // stays in the test database until the next `migrate reset`, which
+    // globalSetup runs before every suite, so it cannot leak between runs.
+    const loanOfficer = await asRole("LOAN_OFFICER");
+
+    expect((await probe(LOAN_REVIEW_APP, loanOfficer)).status).toBe(200);
+  });
+});
+
+/**
+ * F-02 - the last remaining ADMIN.
+ *
+ * Promotion back to ADMIN goes through the same endpoint, which itself requires
+ * an ADMIN, so a sole admin demoting themselves is a one-way door: the only
+ * recovery is running a seed script by hand against the database. The dev
+ * database holds exactly one admin, so this was not theoretical.
+ */
+describe("demoting the last remaining ADMIN", () => {
+  /** Leave exactly `count` admins behind, whoever they are. */
+  async function withAdmins(count: number): Promise<TestUser[]> {
+    await prisma.user.updateMany({ where: { role: "ADMIN" }, data: { role: "USER" } });
+    const admins: TestUser[] = [];
+    for (let i = 0; i < count; i++) {
+      admins.push(await asRole("ADMIN"));
+    }
+    return admins;
+  }
+
+  it("refuses to demote the only admin", async () => {
+    // With one admin, the only way to demote an admin is to demote that admin,
+    // so this one case covers the whole hazard.
+    const [solo] = await withAdmins(1);
+
+    const res = await changeRole(solo, solo.id, "FRAUD_ANALYST");
+
+    expect(res.status, JSON.stringify(res.body)).toBe(400);
+    expect(res.body.error.code).toBe("LAST_ADMIN_CANNOT_BE_DEMOTED");
+
+    const persisted = await prisma.user.findUniqueOrThrow({ where: { id: solo.id } });
+    expect(persisted.role).toBe("ADMIN");
+  });
+
+  it.each(["USER", "SUPPORT", "OPERATIONS_MANAGER", "FRAUD_ANALYST"] as const)(
+    "refuses the demotion to %s as well as to any other role",
+    async (role) => {
+      // The guard must be about the post being emptied, not about which role is
+      // moving into it, or it is one matrix edit away from leaking.
+      const [solo] = await withAdmins(1);
+
+      const res = await changeRole(solo, solo.id, role);
+
+      expect(res.status, JSON.stringify(res.body)).toBe(400);
+      expect(res.body.error.code).toBe("LAST_ADMIN_CANNOT_BE_DEMOTED");
+    },
+  );
+
+  it("names the remedy in the message", async () => {
+    const [solo] = await withAdmins(1);
+
+    const res = await changeRole(solo, solo.id, "USER");
+
+    expect(res.body.error.message).toMatch(/admin/i);
+  });
+
+  it("allows demoting one of two admins, because the post is still filled", async () => {
+    const [actor, other] = await withAdmins(2);
+
+    const res = await changeRole(actor, other.id, "KYC_REVIEWER");
+
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    const persisted = await prisma.user.findUniqueOrThrow({ where: { id: other.id } });
+    expect(persisted.role).toBe("KYC_REVIEWER");
+  });
+
+  it("still allows promoting a user to ADMIN", async () => {
+    const [solo] = await withAdmins(1);
+    const target = await createUser();
+
+    const res = await changeRole(solo, target.id, "ADMIN");
+
+    expect(res.status).toBe(200);
+    const persisted = await prisma.user.findUniqueOrThrow({ where: { id: target.id } });
+    expect(persisted.role).toBe("ADMIN");
+  });
+
+  it("never blocks a role change for a user who is not an admin", async () => {
+    // The guard is on the *source* role, so promoting a customer or moving a
+    // non-admin between staff roles stays open regardless of how many admins
+    // exist.
+    const [solo] = await withAdmins(1);
+    const target = await createUser();
+
+    expect((await changeRole(solo, target.id, "SUPPORT")).status).toBe(200);
+    expect((await changeRole(solo, target.id, "FRAUD_ANALYST")).status).toBe(200);
+    expect((await changeRole(solo, target.id, "USER")).status).toBe(200);
+  });
+});
+

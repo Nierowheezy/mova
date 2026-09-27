@@ -1,4 +1,5 @@
 import { UserRole } from "@prisma/client";
+import { AppError } from "../../../shared/utils/AppError";
 import { prisma } from "../../../config/database";
 
 export class AdminUserService {
@@ -144,6 +145,28 @@ export class AdminUserService {
   }
 
   async changeUserRole(userId: number, role: UserRole) {
+    // Refuse to demote the last remaining ADMIN. Promotion back to ADMIN goes
+    // through this same endpoint, which itself requires an ADMIN, so without this
+    // guard a sole admin demoting themselves locks the admin API permanently
+    // and recovery means running a seed script by hand against the database.
+    if (role !== "ADMIN") {
+      const current = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+
+      if (current?.role === "ADMIN") {
+        const admins = await prisma.user.count({ where: { role: "ADMIN" } });
+        if (admins <= 1) {
+          throw new AppError(
+            "Cannot demote the last remaining ADMIN; promote another admin first",
+            400,
+            "LAST_ADMIN_CANNOT_BE_DEMOTED",
+          );
+        }
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id: userId },
       data: { role },

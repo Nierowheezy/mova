@@ -1,4 +1,5 @@
 import { UserRole } from "@prisma/client";
+import { AppError } from "../../../shared/utils/AppError";
 
 /**
  * The permission vocabulary. Load-bearing: later features (3, 4, 8, 12) consume
@@ -130,10 +131,13 @@ const MATRIX = {
     "loan.review",
   ],
 
-  // Receives escalations and is accountable to the audit trail.
+  // Receives escalations and is accountable to the audit trail. Holds
+  // `case.resolve` because filing a SAR is how a case is closed: without it the
+  // Compliance action set would be unreachable policy.
   COMPLIANCE_OFFICER: [
     "queue.view",
     "case.view",
+    "case.resolve",
     "case.escalate",
     "alert.view",
     "customer.view",
@@ -165,15 +169,29 @@ export function isStaffRole(role: UserRole): boolean {
   return role !== "USER";
 }
 
-export function hasPermission(role: UserRole, permission: Permission): boolean {
-  return ROLE_PERMISSIONS[role].includes(permission);
-}
-
 /**
- * The permissions a role holds. Callers should reach for `hasPermission` when
- * they are about to make a decision; this is for describing a role (a UI menu,
- * an audit record, a 403 message).
+ * The permissions a role holds.
+ *
+ * Throws `AppError(..., 403, "UNKNOWN_ROLE")` for a role value this build does
+ * not know. `Record<UserRole, ...>` makes a missing entry a compile error, but
+ * it cannot cover the *database*: a migration applied before the code that
+ * knows the new roles during a rolling deploy, or a value written by direct
+ * SQL, both put a role in the `users` table that `ROLE_PERMISSIONS` has no row
+ * for. Indexing it blindly threw a `TypeError` that surfaced as a 500.
+ *
+ * Failing loudly as a 403 is the point. A role nobody can classify is not a role
+ * that should be allowed to act, and `UNKNOWN_ROLE` says "this build is behind
+ * the schema" rather than "you are not permitted", which is what an operator
+ * needs to see at 3am.
  */
 export function permissionsFor(role: UserRole): readonly Permission[] {
-  return ROLE_PERMISSIONS[role];
+  const held = ROLE_PERMISSIONS[role];
+  if (!held) {
+    throw new AppError(`Role "${role}" is not in the permission matrix`, 403, "UNKNOWN_ROLE");
+  }
+  return held;
+}
+
+export function hasPermission(role: UserRole, permission: Permission): boolean {
+  return permissionsFor(role).includes(permission);
 }

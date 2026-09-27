@@ -46,8 +46,20 @@ Variations that exist in the codebase and are fine to follow:
   - success: `{ success: true, data }`
   - failure: `{ success: false, error: { code } }`
 - Handlers `return` the response. No fallthrough.
-- Throwing `AppError` (`src/shared/utils/AppError.ts`) is the way to fail; the
-  central `errorHandler` maps it to the envelope.
+- `AppError` (`src/shared/utils/AppError.ts`) + the central `errorHandler` is the
+  contract for *unexpected* or *exceptional* failures: validation, auth token
+  failures, server errors, broken invariants. The handler maps it to the envelope.
+- **Routine authorization denials do not use `AppError`.** A `403` meaning "your
+  role does not allow this" is a decision, not an exception. The guard writes the
+  envelope directly, logs at `warn` through `getChildLogger` with structured
+  fields (`event`, `role`, `userId`), and emits no stack; `errorHandler` remains
+  the fallback. It runs `console.error(err.stack)` for every `AppError`, so
+  routing ordinary denials through it would flood the log pipeline and
+  desensitise real errors.
+- Denials still use a machine-readable code. `FORBIDDEN` for "role lacks the
+  permission", `UNKNOWN_ROLE` for "this build has no row for the role in the
+  database", so an operator can tell a policy denial from a deployment that is
+  behind its own migration.
 - User scoping comes from `req.user?.userId`, never from a client-supplied id.
 - Document every new route with the Swagger JSDoc block the neighbouring routes
   use, so `src/config/swagger.ts` stays accurate.

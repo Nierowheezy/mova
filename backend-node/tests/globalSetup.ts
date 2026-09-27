@@ -2,7 +2,7 @@ import { spawnSync } from "child_process";
 
 export const TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ||
-  "postgresql://postgres:admin1234@localhost:5433/fintech_test";
+  "postgresql://postgres:admin1234@localhost:5433/mintbank_test";
 
 export default function globalSetup() {
   // Give every run a clean schema.

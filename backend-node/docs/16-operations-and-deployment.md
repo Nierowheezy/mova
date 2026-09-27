@@ -101,7 +101,7 @@ docker compose up --build
    `"balanceAfter"`); only `updated_at` is snake_case.
 4. **Cents vs dollars** — Stripe amounts are integer cents; the API reports
    dollars. Compare `event.amount === Number(tx.amount) * 100`.
-5. **`prisma migrate reset` in globalSetup targets `fintech_test` only** —
+5. **`prisma migrate reset` in globalSetup targets `mintbank_test` only** —
    `tests/setup.ts` forces `DATABASE_URL` before imports so dev data is safe.
 
 Next: growing under load → [17-scaling-and-load.md](./17-scaling-and-load.md)

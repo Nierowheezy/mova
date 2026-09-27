@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as client from "@prometheus-io/client";
 import { env } from "../../config/env";
-import { logger } from "../../shared/utils/logger";
+import { logger } from "../utils/logger";
 
 /**
  * Prometheus metrics for fleet-wide observability.
@@ -23,7 +23,8 @@ export const metricsEnabled = env.METRICS_ENABLED === "true";
 export const METRICS_SERVICE_LABEL = "backend-node";
 
 /** Normalize dynamic ids in a URL path so label cardinality stays bounded. */
-const UUID_RE = /(^|\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/|$)/gi;
+const UUID_RE =
+  /(^|\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/|$)/gi;
 const NUM_RE = /(^|\/)\d+(\/|$)/g;
 export function normalizeRoute(path: string): string {
   const normalized = path
@@ -59,7 +60,11 @@ if (metricsEnabled) {
 }
 
 /** Mounted early: observe every request (including 4xx/5xx and rate-limited ones). */
-export function metricsMiddleware(req: Request, _res: Response, next: NextFunction) {
+export function metricsMiddleware(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
   if (!metricsEnabled) return next();
   const start = process.hrtime.bigint();
   _res.on("finish", () => {

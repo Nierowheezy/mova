@@ -73,6 +73,49 @@ enum AmlFlagStatus {
     ESCALATED
 }
 
+// Which team owns a queue of work. Deliberately coarser than UserRole: this
+// names the team, while the seven staff roles that staff it arrive with the RBAC
+// feature. Mapping roles to categories is that feature's job, not this enum's.
+enum QueueCategory {
+    FRAUD
+    KYC
+    LOANS
+    SUPPORT
+}
+
+// Lifecycle of a case. ESCALATED is terminal for the originating queue: the case
+// leaves it for Compliance, who pick it up from the escalations view.
+enum CaseStatus {
+    OPEN
+    UNDER_REVIEW
+    ESCALATED
+    RESOLVED
+}
+
+// Drives queue ordering. URGENT is reserved for cases with a customer-impacting
+// or regulatory deadline, not merely an annoyed customer.
+enum CasePriority {
+    LOW
+    NORMAL
+    HIGH
+    URGENT
+}
+
+enum TaskStatus {
+    OPEN
+    DONE
+}
+
+// Lifecycle of an alert, which is an input to the work layer rather than work
+// itself. Deliberately distinct from AmlFlagStatus, which describes review of an
+// AML flag: an alert is triaged, then may or may not become a case.
+enum AlertStatus {
+    NEW
+    ACKNOWLEDGED
+    RESOLVED
+    DISMISSED
+}
+
 model User {
     id              Int       @id @default(autoincrement())
     email           String    @unique
@@ -119,6 +162,13 @@ model User {
     passwordHistory       PasswordHistory[]
     auditLogs             AuditLog[]
     verificationTokens    VerificationToken[] // one-to-many
+
+    // Mintbank Work layer. An operator is also a User, so staff appear here as
+    // assignees; customers appear as the subject of a case.
+    casesAsCustomer Case[] @relation("CaseCustomer")
+    assignedCases   Case[] @relation("CaseAssignee")
+    assignedTasks   Task[] @relation("TaskAssignee")
+    alerts          Alert[]
 
     @@map("users")
 }
@@ -189,6 +239,9 @@ model KYC {
     userId Int  @unique @map("user_id")
     user   User @relation(fields: [userId], references: [id])
 
+    // Mintbank Work layer: a KYC reviewer opens cases against this record.
+    cases Case[]
+
     @@map("kyc_records")
 }
 
@@ -227,6 +280,10 @@ model Transaction {
     receiver   User? @relation("ReceivedTransactions", fields: [receiverId], references: [id])
 
     notifications Notification[]
+
+    // Mintbank Work layer: a fraud investigation hangs off the transaction.
+    cases  Case[]
+    alerts Alert[]
 
     @@map("transactions")
 }
@@ -301,9 +358,17 @@ model AuditLog {
     userAgent String?
     createdAt DateTime @default(now())
 
+    // Mintbank Work layer. Nullable on purpose: admin actions taken outside any
+    // case (freezing a user, approving KYC) predate the Work layer and must keep
+    // writing rows with no case attached. The Work layer extends this one trail
+    // rather than opening a second one, so the audit history stays whole.
+    caseId Int?  @map("case_id")
+    case   Case? @relation(fields: [caseId], references: [id])
+
     @@index([userId])
     @@index([action])
     @@index([createdAt])
+    @@index([caseId])
     @@map("audit_logs")
 }
 
@@ -327,6 +392,10 @@ model AmlFlag {
 
     userId Int  @map("user_id")
     user   User @relation(fields: [userId], references: [id])
+
+    // Mintbank Work layer: an AML flag can raise a case without being one.
+    cases  Case[]
+    alerts Alert[]
 
     @@index([userId])
     @@index([status])
@@ -379,4 +448,167 @@ model WebhookEvent {
 
     @@index([eventId])
     @@map("webhook_events")
+}
+
+// ─── Mintbank Work layer (operations) ───────────────────────────────────────
+// Queues of work for bank operations staff, arranged around a shared customer
+// record. This layer READS the banking entities above and never writes to them:
+// no money moves here, no LedgerEntry is touched, and no transaction is decided
+// automatically. Rationale for these shapes: src/modules/operations/README.md.
+
+// How long a queue's work must be handled within. This holds the policy, not an
+// instance: Case.dueAt is copied from the active policy when a case opens and is
+// never recomputed, so editing a policy cannot retroactively move deadlines on
+// cases already in flight.
+model SlaPolicy {
+    id                   Int      @id @default(autoincrement())
+    name                 String   @unique
+    durationMinutes      Int      @map("duration_minutes")
+    businessHoursOnly    Boolean  @default(false) @map("business_hours_only")
+    escalateAfterMinutes Int?     @map("escalate_after_minutes")
+    createdAt            DateTime @default(now()) @map("created_at")
+    updatedAt            DateTime @updatedAt @map("updated_at")
+
+    queues Queue[] @relation("QueueDefaultSla")
+    cases  Case[]  @relation("CaseSlaPolicy")
+
+    @@map("sla_policies")
+}
+
+// A unit of work: Fraud, KYC, Loans, or Support. New cases in a queue inherit
+// its default SLA policy when one is set.
+model Queue {
+    id                 Int           @id @default(autoincrement())
+    name               String        @unique
+    slug               String        @unique
+    category           QueueCategory
+    description        String?
+    isActive           Boolean       @default(true) @map("is_active")
+    defaultSlaPolicyId Int?          @map("default_sla_policy_id")
+    createdAt          DateTime      @default(now()) @map("created_at")
+    updatedAt          DateTime      @updatedAt @map("updated_at")
+
+    defaultSlaPolicy SlaPolicy? @relation("QueueDefaultSla", fields: [defaultSlaPolicyId], references: [id])
+    cases            Case[]
+
+    @@index([category, isActive])
+    @@map("queues")
+}
+
+// The central work record: one thing an operator has to resolve. Links to the
+// banking entities it concerns through explicit nullable foreign keys rather than
+// a generic (entityType, entityId) pair, because referential integrity is a
+// regulatory requirement and queue queries need real indexed foreign keys.
+//
+// No onDelete cascade here on purpose. A case is evidence; deleting one must be a
+// deliberate, audited act, never a side effect of deleting something else.
+model Case {
+    id               Int          @id @default(autoincrement())
+    reference        String       @unique @default(uuid()) // quotable in a ticket or a chat
+    title            String
+    description      String?
+    status           CaseStatus   @default(OPEN)
+    priority         CasePriority @default(NORMAL)
+    dueAt            DateTime?    @map("due_at") // frozen at open time, never recomputed
+    openedAt         DateTime     @default(now()) @map("opened_at")
+    resolvedAt       DateTime?    @map("resolved_at")
+    resolutionReason String?      @map("resolution_reason")
+    createdAt        DateTime     @default(now()) @map("created_at")
+    updatedAt        DateTime     @updatedAt @map("updated_at")
+
+    queueId Int   @map("queue_id")
+    queue   Queue @relation(fields: [queueId], references: [id])
+
+    customerId Int?  @map("customer_id")
+    customer   User? @relation("CaseCustomer", fields: [customerId], references: [id])
+
+    transactionId Int?         @map("transaction_id")
+    transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+    kycId Int? @map("kyc_id")
+    kyc   KYC? @relation(fields: [kycId], references: [id])
+
+    amlFlagId Int?     @map("aml_flag_id")
+    amlFlag   AmlFlag? @relation(fields: [amlFlagId], references: [id])
+
+    assigneeId Int?  @map("assignee_id")
+    assignee   User? @relation("CaseAssignee", fields: [assigneeId], references: [id])
+
+    slaPolicyId Int?       @map("sla_policy_id")
+    slaPolicy   SlaPolicy? @relation("CaseSlaPolicy", fields: [slaPolicyId], references: [id])
+
+    tasks     Task[]
+    auditLogs AuditLog[]
+    alert     Alert? // set when the case was raised from an alert
+
+    @@index([queueId, status])
+    @@index([assigneeId, status])
+    @@index([dueAt])
+    @@index([customerId])
+    @@map("cases")
+}
+
+// A checklist item on a case, for work that is more than a single action.
+// Subordinate to the case, so it is removed with it.
+model Task {
+    id          Int        @id @default(autoincrement())
+    title       String
+    status      TaskStatus @default(OPEN)
+    dueAt       DateTime?  @map("due_at")
+    completedAt DateTime?  @map("completed_at")
+    createdAt   DateTime   @default(now()) @map("created_at")
+    updatedAt   DateTime   @updatedAt @map("updated_at")
+
+    caseId Int  @map("case_id")
+    case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+    assigneeId Int?  @map("assignee_id")
+    assignee   User? @relation("TaskAssignee", fields: [assigneeId], references: [id])
+
+    @@index([caseId])
+    @@index([assigneeId, status])
+    @@map("tasks")
+}
+
+// A detected exception, and the Work layer's intake. Source-agnostic on purpose:
+// operations need one "Needs Attention" stream spanning AML rule hits, ledger
+// reconciliation breaks, and KYC SLA breaches, not three separate inboxes.
+// AmlFlag stays exactly as it is; an alert may point at one.
+//
+// `source` and `rule` are free strings rather than enums, so a new detection
+// source can be added without a migration. `details` is the untyped "why it
+// fired" payload; its shape belongs to whichever feature first renders it.
+model Alert {
+    id            Int          @id @default(autoincrement())
+    rule          String // machine-readable rule id, e.g. "LARGE_SINGLE_TX"
+    source        String // producing subsystem, e.g. "AML", "LEDGER", "KYC_SLA"
+    severity      AmlSeverity // reuses the existing severity scale
+    status        AlertStatus  @default(NEW)
+    title         String
+    details       Json? // why it fired: rule inputs, amounts, window sums
+    acknowledgedAt DateTime?   @map("acknowledged_at")
+    resolvedAt    DateTime?    @map("resolved_at")
+    createdAt     DateTime     @default(now()) @map("created_at")
+    updatedAt     DateTime     @updatedAt @map("updated_at")
+
+    userId Int?  @map("user_id")
+    user   User? @relation(fields: [userId], references: [id])
+
+    transactionId Int?         @map("transaction_id")
+    transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+    amlFlagId Int?     @map("aml_flag_id")
+    amlFlag   AmlFlag? @relation(fields: [amlFlagId], references: [id])
+
+    // The origin of the case. A case has at most one originating alert, which
+    // is what this unique constraint enforces; an alert holds a single id, so
+    // it can only ever be adopted into one case. Nullable so an alert can sit
+    // unadopted in the stream, which is the normal state before triage.
+    caseId Int?  @unique @map("case_id")
+    case   Case? @relation(fields: [caseId], references: [id])
+
+    @@index([status, severity])
+    @@index([userId])
+    @@index([rule])
+    @@map("alerts")
 }

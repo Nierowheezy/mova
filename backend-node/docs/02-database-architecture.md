@@ -113,7 +113,7 @@ serious fintech runs one.
 - **Naming**: follow `prisma migrate dev --name <short_what_changed>`.
 - **`pnpm db:backfill:ledger`** — one-time script for environments whose
   wallets predate the ledger. Run it wherever pre-rollout balances exist.
-- **Test DB:** `frontend tests` reset `fintech_test` via `prisma migrate reset
+- **Test DB:** `frontend tests` reset `mintbank_test` via `prisma migrate reset
   --force --skip-seed` each run (see [15-testing.md](./15-testing.md)).
 
 ## 7. Indexes & query notes (senior-engineer lens)

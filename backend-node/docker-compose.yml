@@ -15,13 +15,13 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin1234}
-      POSTGRES_DB: fintech_dev
+      POSTGRES_DB: mintbank_dev
     ports:
       - "5433:5432" # host 5433 keeps the loopback dev setup unchanged
     volumes:
-      - fintech_pgdata:/var/lib/postgresql/data
+      - mintbank_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d fintech_dev"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mintbank_dev"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -38,7 +38,7 @@ services:
       NODE_ENV: production
       PORT: 8000
       # Inside the compose network the app reaches Postgres as `db`.
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-admin1234}@db:5432/fintech_dev?schema=public
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-admin1234}@db:5432/mintbank_dev?schema=public
       UPLOAD_DIR: /app/uploads/
       # Expose Prometheus metrics for the local monitoring stack (see below).
       METRICS_ENABLED: "true"
@@ -85,7 +85,7 @@ services:
       - prometheus
 
 volumes:
-  fintech_pgdata:
+  mintbank_pgdata:
   fintech_uploads:
   fintech_prom:
   fintech_grafana:

@@ -12,6 +12,14 @@ export const TEST_PIN = "1234";
 
 /** Wipe all tables (children first) so each suite starts clean. */
 export async function resetDatabase() {
+  // Mintbank Work layer first. These five tables reference the banking tables
+  // below, so they must go first or the deletes below hit live references
+  // (queue <- case, user <- case.customerId, aml_flag <- case/alert).
+  await prisma.alert.deleteMany();
+  await prisma.task.deleteMany();
+  await prisma.case.deleteMany();
+  await prisma.queue.deleteMany();
+  await prisma.slaPolicy.deleteMany();
   await prisma.amlFlag.deleteMany();
   await prisma.webhookEvent.deleteMany();
   await prisma.ledgerEntry.deleteMany();

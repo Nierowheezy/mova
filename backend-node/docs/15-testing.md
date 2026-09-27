@@ -6,7 +6,7 @@
 ## 1. The stack
 
 **Vitest + supertest** run against the **real app** (`src/app.ts`) and a **real
-PostgreSQL** database (`fintech_test`). No mocks for the money paths — the
+PostgreSQL** database (`mintbank_test`). No mocks for the money paths — the
 tests exercise the actual SQL, row locks, ledger writes, and webhook handlers.
 
 Run them:
@@ -20,7 +20,7 @@ pnpm exec vitest run tests/deposit.integration.test.ts   # one file
 
 | File | Job |
 | --- | --- |
-| `tests/globalSetup.ts` | Runs `prisma migrate reset --force --skip-seed` against `fintech_test` before every run — **applies the real migrations**, so the schema is always current, then wipes data. |
+| `tests/globalSetup.ts` | Runs `prisma migrate reset --force --skip-seed` against `mintbank_test` before every run — **applies the real migrations**, so the schema is always current, then wipes data. |
 | `tests/setup.ts` | Sets `DATABASE_URL` to the test DB **before any src import** (comment explains why: `dotenv` never overrides an already-set var, so the dev database is never touched). Also seeds stub webhook secrets. |
 | `tests/helpers.ts` | `resetDatabase()` wipes every table **children-first** (now including `aml_flags` — the AML table FK otherwise blocks `user.deleteMany()`). `createUser()` provisions a user, wallet, KYC (optional), stripe account, PIN, and sets `tier: VERIFIED` when `kycVerified: true` — mirroring the KYC-driven tier model. |
 

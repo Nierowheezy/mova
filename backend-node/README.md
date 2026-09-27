@@ -27,7 +27,7 @@ docker compose up --build   # API on :8000, Postgres on host :5433
 
 ```bash
 pnpm build                  # tsc — must be clean
-pnpm test                   # 22 integration/unit tests against fintech_test
+pnpm test                   # 22 integration/unit tests against mintbank_test
 ```
 
 ## Repository map
@@ -45,7 +45,7 @@ src/
                          utils (AppError, encryption, cookies), enums, constants
 prisma/
   schema.prisma          source of truth; migrations/ for every schema change
-tests/                   vitest + supertest against a real Postgres (fintech_test)
+tests/                   vitest + supertest against a real Postgres (mintbank_test)
 Dockerfile · docker-compose.yml · docker-entrypoint.sh
 ```
 
